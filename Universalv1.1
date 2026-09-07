@@ -1,0 +1,1557 @@
+--[[
+    EPRAS HUB - UNIVERSAL SCRIPT V2.0 (PROFESSIONAL EDITION)
+    Gelişmiş Aimbot, ESP, Oyuncu Paneli, Işınlanma ve Güvenlik Sistemleri.
+]]
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+--==================================================
+-- ÇOKLU DİL SİSTEMİ (Varsayılan: İngilizce - EN)
+--==================================================
+
+local currentLang = "EN"
+local toggleKey = Enum.KeyCode.RightControl
+
+local TRANSLATIONS = {
+    EN = {
+        running = "UNDETECTED",
+        dashboard = "Main / Control",
+        visuals = "Visuals / ESP",
+        targeting = "Aimbot / Combat",
+        movement = "Movement / Misc",
+        settings = "Settings / Hub",
+        subMain = "Master protection and security.",
+        subVisuals = "Visual ESP, custom crosshair and lighting.",
+        subTargeting = "Precision Aimbot, FOV and target locking.",
+        subMovement = "Noclip, flight, speed, jump height and movement fixes.",
+        subSettings = "Hub preferences, language, audio and binds.",
+        masterProt = "Master Bypass", masterProtDesc = "Advanced engine protection and anti-ban.",
+        streamProof = "OBS StreamProof", streamProofDesc = "Hides UI from screen captures and OBS.",
+        boxEsp = "Player Box ESP", boxEspDesc = "Highlights enemies with 2D boxes.",
+        nameTags = "Name & Health Info", nameTagsDesc = "Names, health bars, distance and details.",
+        fullbright = "World Fullbright", fullbrightDesc = "Removes global darkness and shadows.",
+        aimbot = "Silent / Legit Aimbot", aimbotDesc = "Automatic target locking system via RMB.",
+        fovToggle = "Draw FOV Circle", aimbotDesc2 = "Displays target area circle.",
+        fovRing = "FOV Circle Radius", fovRingDesc = "Adjust the targeting detection area size.",
+        crosshair = "Crosshair", crosshairDesc = "Professional center screen crosshair.",
+        noclip = "Noclip", noclipDesc = "Allows you to walk through walls and obstacles.",
+        speedFix = "Run Speed Limit Fix", speedFixDesc = "Fixes sprint speed limitation on Shift key.",
+        flyMode = "Flight Mode (Fly)", flyModeDesc = "Disables gravity for free flight.",
+        speedMult = "Walkspeed Multiplier", speedMultDesc = "Character movement speed multiplier.",
+        jumpPower = "Jump Power Multiplier", jumpPowerDesc = "Custom jump height multiplier.",
+        spinBot = "Spinbot Mechanics", spinBotDesc = "Spins character rapidly around axis.",
+        teleportPanel = "Player Teleport Panel", teleportPanelDesc = "Player list, tracking, spectating and TP menu.",
+        bgMusic = "Ambient Background Music", bgMusicDesc = "Ambient hub audio volume.",
+        langSelect = "Language / Dil", langSelectDesc = "Click flag to change interface language.",
+        toggleKey = "Menu Keybind", toggleKeyDesc = "Press to assign new menu toggle key.",
+        closeConfirm = "Are you sure you want to completely close the interface?",
+        yes = "Yes", no = "No", loading = "Loading EPRAS HUB...",
+        searchPlayer = "Search player (Type name)...",
+        spectate = "Spectate", stopSpectate = "Stop Spectate",
+        follow = "Follow", stopFollow = "Stop Follow", tp = "Teleport",
+        riskSafe = "Safe", riskWarning = "Moderate", riskDanger = "High Risk",
+        smoothTitle = "Aimbot Smoothness (Damping)", smoothDesc = "Target transition smoothing (1: Safe, 10: High Risk).",
+        loaderTip1 = "Tip: Press RightControl to toggle the menu open/closed.",
+        loaderTip2 = "Tip: Hold Right Mouse Button (RMB) to activate Aimbot inside FOV.",
+        loaderTip3 = "Tip: Use Noclip and Fly features safely in private servers.",
+        loaderTip4 = "Tip: Adjust interpolation damping for optimal legitimacy."
+    },
+    TR = {
+        running = "UNDETECTED",
+        dashboard = "Ana / Kontrol",
+        visuals = "Görseller / ESP",
+        targeting = "Aimbot / Savaş",
+        movement = "Hareket / Diğer",
+        settings = "Ayarlar / Hub",
+        subMain = "Ana koruma ve güvenlik.",
+        subVisuals = "Görsel ESP, özelleştirilebilir crosshair ve aydınlatma.",
+        subTargeting = "Hassas Aimbot, FOV ve otomatik hedefleme.",
+        subMovement = "Noclip, uçuş, hız, zıplama gücü ve hareket düzeltmeleri.",
+        subSettings = "Arayüz tercihleri, dil, ses ve kısayollar.",
+        masterProt = "Master Bypass", masterProtDesc = "Gelişmiş motor koruma katmanı ve anti-ban.",
+        streamProof = "OBS StreamProof", streamProofDesc = "Arayüzü ekran kayıtlarından ve OBS'ten gizler.",
+        boxEsp = "Player Box ESP", boxEspDesc = "Düşmanları 2D çerçeve içinde gösterir.",
+        nameTags = "Name & Health Info", nameTagsDesc = "İsim, sağlık barları, mesafe ve detaylar.",
+        fullbright = "World Fullbright", fullbrightDesc = "Haritadaki tüm karanlığı ve gölgeleri kaldırır.",
+        aimbot = "Silent / Legit Aimbot", aimbotDesc = "Sağ tık ile hedefe otomatik kilitlenme sistemi.",
+        fovToggle = "Draw FOV Circle", aimbotDesc2 = "Aimbot çalışma alanını çember olarak gösterir.",
+        fovRing = "FOV Çember Boyutu", fovRingDesc = "Hedef algılama çemberinin yarıçapını ayarlayın.",
+        crosshair = "Crosshair", crosshairDesc = "Ekran merkezine profesyonel nişangah.",
+        noclip = "Noclip", noclipDesc = "Duvarlardan ve engellerden geçmenizi sağlar.",
+        speedFix = "Koşma Hızı Sınır Fixi", speedFixDesc = "Shift tuşunda hız limitine takılma sorununu giderir.",
+        flyMode = "Flight Mode (Fly)", flyModeDesc = "Yerçekimini devre dışı bırakarak serbest uçuş.",
+        speedMult = "Walkspeed Multiplier", speedMultDesc = "Karakter hareket hızı çarpanı.",
+        jumpPower = "Zıplama Yüksekliği", jumpPowerDesc = "Karakter zıplama gücü seviyesi.",
+        spinBot = "Spinbot Mechanics", spinBotDesc = "Karakteri kendi etrafında çılgınca döndürür.",
+        teleportPanel = "Player Teleport Panel", teleportPanelDesc = "Oyuncu listesi, takip etme, izleme ve ışınlanma.",
+        bgMusic = "Ambient Background Music", bgMusicDesc = "Ortam hile müziği ses seviyesi.",
+        langSelect = "Language / Dil", langSelectDesc = "Arayüz dilini değiştirmek için bayrağa tıklayın.",
+        toggleKey = "Menu Keybind", toggleKeyDesc = "Arayüzü açıp kapatmak için atanan tuş.",
+        closeConfirm = "Arayüzü tamamen kapatmak istediğinizden emin misiniz?",
+        yes = "Evet", no = "Hayır", loading = "EPRAS HUB Yükleniyor...",
+        searchPlayer = "Oyuncu Ara (İsim girin)...",
+        spectate = "İzle", stopSpectate = "İzlemeyi Durdur",
+        follow = "Takip Et", stopFollow = "Takibi Durdur", tp = "Işınlan",
+        riskSafe = "Güvenli", riskWarning = "Orta Risk", riskDanger = "Yüksek Risk",
+        smoothTitle = "Aimbot Smooth (Damping)", smoothDesc = "Hedef geçiş yumuşatma (1: Rahat/Güvenli, 10: Riskli).",
+        loaderTip1 = "Tip: Press RightControl to toggle the menu open/closed.",
+        loaderTip2 = "Tip: Hold Right Mouse Button (RMB) to activate Aimbot inside FOV.",
+        loaderTip3 = "Tip: Use Noclip and Fly features safely in private servers.",
+        loaderTip4 = "Tip: Adjust interpolation damping for optimal legitimacy."
+    },
+    ZH = {
+        running = "安全运行",
+        dashboard = "主控面板",
+        visuals = "视觉透视",
+        targeting = "自瞄 combat",
+        movement = "移动杂项",
+        settings = "系统设置",
+        subMain = "主防护与安全管理。",
+        subVisuals = "方框ESP、自定义准星与全亮度。",
+        subTargeting = "精准自瞄、FOV范围与锁定系统。",
+        subMovement = "穿墙、飞行、跳跃高度与传送面板。",
+        subSettings = "界面偏好、语言、音效与快捷键。",
+        masterProt = "核心防护", masterProtDesc = "高级引擎安全防护与反作弊 bypass。",
+        streamProof = "防直播捕获", streamProofDesc = "在 OBS 和录屏中完美隐藏界面。",
+        boxEsp = "方框透视 (ESP)", boxEspDesc = "显示敌方玩家 2D 方框轮廓。",
+        nameTags = "名字与血量详情", nameTagsDesc = "显示名称、生命值条、距离及详细信息。",
+        fullbright = "全局全亮", fullbrightDesc = "移除地图中的所有黑暗与阴影。",
+        aimbot = "自瞄锁头系统", aimbotDesc = "通过鼠标右键平滑锁定敌人头部。",
+        fovToggle = "绘制 FOV 范围", aimbotDesc2 = "在屏幕中心显示自瞄判定圆环。",
+        fovRing = "FOV 圆环半径", fovRingDesc = "调整自瞄检测判定范围大小。",
+        crosshair = "Crosshair", crosshairDesc = "专业中心十字准星渲染。",
+        noclip = "穿墙模式 (Noclip)", noclipDesc = "允许穿过墙壁和所有障碍物。",
+        speedFix = "跑步速度限制修复", speedFixDesc = "修复按住 Shift 时的速度上限问题。",
+        flyMode = "自由飞行模式", flyModeDesc = "关闭重力支持全方向自由飞行。",
+        speedMult = "移动速度倍率", speedMultDesc = "自定义角色移动速度增幅。",
+        jumpPower = "跳跃高度倍率", jumpPowerDesc = "自定义角色跳跃高度限制。",
+        spinBot = "旋转机器人", spinBotDesc = "高速旋转角色迷惑对手视线。",
+        teleportPanel = "玩家传送与管理面板", teleportPanelDesc = "玩家列表、旁观、追踪与瞬移菜单。",
+        bgMusic = "环境背景音乐", bgMusicDesc = "控制菜单环境音量大小。",
+        langSelect = "语言选择", langSelectDesc = "点击国旗切换界面显示语言。",
+        toggleKey = "菜单快捷键", toggleKeyDesc = "按下以更改菜单开关按键。",
+        closeConfirm = "您确定要完全关闭界面吗？",
+        yes = "确定", no = "取消", loading = "正在加载 EPRAS HUB...",
+        searchPlayer = "搜索玩家（输入名称）...",
+        spectate = "旁观", stopSpectate = "停止旁观",
+        follow = "追踪", stopFollow = "停止追踪", tp = "传送",
+        riskSafe = "安全", riskWarning = "中等风险", riskDanger = "高风险",
+        smoothTitle = "自瞄平滑度 (Smooth)", smoothDesc = "目标过渡平滑敏感度调节 (1-10)。",
+        loaderTip1 = "Tip: Press RightControl to toggle the menu open/closed.",
+        loaderTip2 = "Tip: Hold Right Mouse Button (RMB) to activate Aimbot inside FOV.",
+        loaderTip3 = "Tip: Use Noclip and Fly features safely in private servers.",
+        loaderTip4 = "Tip: Adjust interpolation damping for optimal legitimacy."
+    },
+    AR = {
+        running = "آمن (Undetected)",
+        dashboard = "لوحة التحكم الرئيسية",
+        visuals = "المؤثرات البصرية و ESP",
+        targeting = "نظام التصويب (Aimbot)",
+        movement = "الحركة والخصائص",
+        settings = "الإعدادات والتحكم",
+        subMain = "الحماية الرئيسية والأمان.",
+        subVisuals = "كشف اللاعبين، مؤشر تصويب والإضاءة.",
+        subTargeting = "تصويب دقيق، نطاق FOV وقفل الأهداف.",
+        subMovement = "تجاوز الجدران، الطيران، القفز والسرعة.",
+        subSettings = "تفضيلات الواجهة، اللغة، الصوت والمفاتيح.",
+        masterProt = "الحماية القصوى", masterProtDesc = "طبقة حماية متقدمة وتجاوز الحظر.",
+        streamProof = "حماية البث OBS", streamProofDesc = "إخفاء الواجهة بالكامل عن برامج التصوير.",
+        boxEsp = "إطار اللاعبين ESP", boxEspDesc = "إظهار الأعداء داخل صناديق ثنائية الأبعاد.",
+        nameTags = "معلومات الاسم والصحة", nameTagsDesc = "عرض الأسماء، شريط الصحة، المسافة والتفاصيل.",
+        fullbright = "إضاءة العالم الكاملة", fullbrightDesc = "إزالة الظلام والظلال من الخريطة تماماً.",
+        aimbot = "تصويب آلي ذكي", aimbotDesc = "نظام القفل التلقائي عبر الزر الأيمن.",
+        fovToggle = "إظهار نطاق FOV", aimbotDesc2 = "رسم دائرة الاستهداف المركزية للرؤية.",
+        fovRing = "حجم نطاق FOV", fovRingDesc = "ضبط مساحة وسعة نطاق الاستهداف الآلي.",
+        crosshair = "Crosshair", crosshairDesc = "مؤشر تصويب احترافي وسط الشاشة.",
+        noclip = "الممشى الوهمي (Noclip)", noclipDesc = "يسمح لك بالمرور عبر الجدران والعقبات.",
+        speedFix = "إصلاح سرعة الجري", speedFixDesc = "إصلاح تقييد السرعة عند الضغط على زر Shift.",
+        flyMode = "وضع الطيران الحر", flyModeDesc = "إلغاء الجاذبية للطيران بحرية في الهواء.",
+        speedMult = "مضاعف سرعة المشي", speedMultDesc = "التحكم في سرعة حركة الشخصية.",
+        jumpPower = "قوة القفز العالي", jumpPowerDesc = "تعديل ارتفاع قفزة الشخصية.",
+        spinBot = "مارد الدوران السريع", spinBotDesc = "دوران الشخصية بسرعة hائلة حول نفسها.",
+        teleportPanel = "لوحة النقل والمتابعة", teleportPanelDesc = "قائمة اللاعبين، المراقبة، الالتصاق وانتقال.",
+        bgMusic = "موسيقى الخلفية الهادئة", bgMusicDesc = "مستوى صوت الواجهة البيئي.",
+        langSelect = "اختيار اللغة", langSelectDesc = "اضغط على العلم لتغيير لغة الواجهة فوراً.",
+        toggleKey = "مفتاح القائمة", toggleKeyDesc = "اضغط لتعيين مفتاح فتح وإغلاق القائمة.",
+        closeConfirm = "هل أنت متأكد أنك تريد إغلاق الواجهة تماماً؟",
+        yes = "نعم", no = "لا", loading = "جاري تحميل EPRAS HUB...",
+        searchPlayer = "بحث عن لاعب (اكتب الاسم)...",
+        spectate = "مراقبة", stopSpectate = "إيقاف المراقبة",
+        follow = "متابعة", stopFollow = "إيقاف المتابعة", tp = "انتقال",
+        riskSafe = "آمن", riskWarning = "خطر متوسط", riskDanger = "خطر عالٍ",
+        smoothTitle = "نعومة التصويب (Smooth)", smoothDesc = "درجة سلاسة الانتقال (1: مريح، 10: خطر).",
+        loaderTip1 = "Tip: Press RightControl to toggle the menu open/closed.",
+        loaderTip2 = "Tip: Hold Right Mouse Button (RMB) to activate Aimbot inside FOV.",
+        loaderTip3 = "Tip: Use Noclip and Fly features safely in private servers.",
+        loaderTip4 = "Tip: Adjust interpolation damping for optimal legitimacy."
+    }
+}
+
+local function getTxt(key)
+    if TRANSLATIONS[currentLang] and TRANSLATIONS[currentLang][key] then
+        return TRANSLATIONS[currentLang][key]
+    end
+    return TRANSLATIONS["EN"][key] or key
+end
+
+--==================================================
+-- TEMA VE MÜZİK
+--==================================================
+
+local COLORS = {
+    Background = Color3.fromRGB(8, 6, 15),
+    Panel = Color3.fromRGB(17, 12, 29),
+    Card = Color3.fromRGB(28, 20, 46),
+    Purple = Color3.fromRGB(181, 76, 255),
+    PurpleDark = Color3.fromRGB(74, 35, 113),
+    Text = Color3.fromRGB(241, 234, 249),
+    Muted = Color3.fromRGB(164, 149, 186),
+    Green = Color3.fromRGB(95, 230, 160),
+    Yellow = Color3.fromRGB(255, 190, 60),
+    Red = Color3.fromRGB(220, 60, 90),
+    White = Color3.fromRGB(255, 255, 255)
+}
+
+local bgSound = Instance.new("Sound")
+bgSound.Name = "EprasUiSound"
+bgSound.SoundId = "rbxassetid://9043887091"
+bgSound.Volume = 0.08
+bgSound.Looped = true
+bgSound.Parent = SoundService
+pcall(function() bgSound:Play() end)
+
+local function create(className, properties, parent)
+    local object = Instance.new(className)
+    for property, value in pairs(properties) do
+        object[property] = value
+    end
+    object.Parent = parent
+    return object
+end
+
+local function rounded(object, radius)
+    return create("UICorner", { CornerRadius = UDim.new(0, radius) }, object)
+end
+
+local function outline(object, color, thickness)
+    return create("UIStroke", { Color = color, Thickness = thickness or 1 }, object)
+end
+
+--==================================================
+-- SCREEN GUI & STREAMPROOF
+--==================================================
+
+local gui = create("ScreenGui", {
+    Name = "EprasHubGui",
+    ResetOnSpawn = false,
+    ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+}, playerGui)
+
+local isStreamProofActive = false
+local function updateStreamProof()
+    if isStreamProofActive then
+        pcall(function() gui.Parent = CoreGui end)
+    else
+        pcall(function() gui.Parent = playerGui end)
+    end
+end
+
+-- YÜKLEME EKRANI
+local isFullyLoaded = false
+
+local loader = create("Frame", {
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(400, 180),
+    BackgroundColor3 = COLORS.Background,
+    ZIndex = 100
+}, gui)
+rounded(loader, 16)
+outline(loader, COLORS.Purple, 1.5)
+
+local loadText = create("TextLabel", {
+    Position = UDim2.fromOffset(0, 24),
+    Size = UDim2.new(1, 0, 0, 30),
+    BackgroundTransparency = 1,
+    Text = getTxt("loading"),
+    TextColor3 = COLORS.Text,
+    TextSize = 18,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 101
+}, loader)
+
+local loadTipLabel = create("TextLabel", {
+    Position = UDim2.fromOffset(20, 60),
+    Size = UDim2.new(1, -40, 0, 40),
+    BackgroundTransparency = 1,
+    Text = "Initializing Core Mechanics & Anti-Cheat Bypass...",
+    TextColor3 = COLORS.Muted,
+    TextSize = 11,
+    Font = Enum.Font.GothamMedium,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Center,
+    ZIndex = 101
+}, loader)
+
+local loadBarBg = create("Frame", {
+    Position = UDim2.fromOffset(30, 115),
+    Size = UDim2.new(1, -60, 0, 8),
+    BackgroundColor3 = COLORS.Panel,
+    ZIndex = 101
+}, loader)
+rounded(loadBarBg, 4)
+
+local loadBarFill = create("Frame", {
+    Size = UDim2.new(0, 0, 1, 0),
+    BackgroundColor3 = COLORS.Purple,
+    ZIndex = 102
+}, loadBarBg)
+rounded(loadBarFill, 4)
+
+local loadPercentLbl = create("TextLabel", {
+    Position = UDim2.fromOffset(0, 132),
+    Size = UDim2.new(1, 0, 0, 20),
+    BackgroundTransparency = 1,
+    Text = "0%",
+    TextColor3 = COLORS.Purple,
+    TextSize = 12,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 101
+}, loader)
+
+-- MAIN WINDOW
+local main = create("Frame", {
+    Name = "MainWindow",
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(880, 540),
+    BackgroundColor3 = COLORS.Background,
+    ClipsDescendants = true,
+    Visible = false,
+    ZIndex = 10
+}, gui)
+rounded(main, 16)
+outline(main, COLORS.Purple, 1.5)
+
+-- BUBBLES ANİMASYONU
+local bubbleContainer = create("Frame", {
+    Size = UDim2.fromScale(1, 1),
+    BackgroundTransparency = 1,
+    ClipsDescendants = true,
+    ZIndex = 11
+}, main)
+
+task.spawn(function()
+    while main and main.Parent do
+        task.wait(math.random(6, 12) / 10)
+        local size = math.random(12, 36)
+        local bubble = create("Frame", {
+            Position = UDim2.new(math.random(5, 95) / 100, 0, 1.05, 0),
+            Size = UDim2.fromOffset(size, size),
+            BackgroundColor3 = (math.random(1, 2) == 1 and COLORS.Purple or COLORS.PurpleDark),
+            BackgroundTransparency = math.random(65, 85) / 100,
+            ZIndex = 12
+        }, bubbleContainer)
+        rounded(bubble, size / 2)
+
+        local duration = math.random(4, 7)
+        local targetX = bubble.Position.X.Scale + (math.random(-10, 10) / 100)
+        local tween = TweenService:Create(bubble, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(targetX, 0, -0.1, 0),
+            BackgroundTransparency = 1
+        })
+        tween:Play()
+        tween.Completed:Connect(function() bubble:Destroy() end)
+    end
+end)
+
+local isMenuOpen = false
+local function setMenuVisible(visible)
+    if not isFullyLoaded then return end
+    if visible and not isMenuOpen then
+        isMenuOpen = true
+        main.Visible = true
+        main.Size = UDim2.fromOffset(0, 0)
+        main.Rotation = -5
+        local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        TweenService:Create(main, tweenInfo, { Size = UDim2.fromOffset(880, 540), Rotation = 0 }):Play()
+    elseif not visible and isMenuOpen then
+        isMenuOpen = false
+        local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        local tween = TweenService:Create(main, tweenInfo, { Size = UDim2.fromOffset(0, 0), Rotation = 5 })
+        tween:Play()
+        tween.Completed:Connect(function()
+            if not isMenuOpen then main.Visible = false end
+        end)
+    end
+end
+
+-- YÜKLEME AŞAMALARI
+task.spawn(function()
+    local initStages = {
+        {progress = 0.15, text = "Bypassing Anti-Cheat Hooks & Integrity Checks..."},
+        {progress = 0.40, text = "Pre-loading ESP Renderers & Highlighting Vectors..."},
+        {progress = 0.70, text = "Compiling Aimbot Target Resolution & FOV Matrix..."},
+        {progress = 0.90, text = "Initializing User Interface Animations & Styles..."},
+        {progress = 1.00, text = "Loading Complete! Launching EPRAS HUB..."}
+    }
+    
+    for _, stage in ipairs(initStages) do
+        local startP = tonumber(loadPercentLbl.Text:match("%d+")) / 100
+        local targetP = stage.progress
+        loadTipLabel.Text = stage.text
+        
+        local t = 0
+        while t < 1 do
+            t = t + 0.1
+            local currP = startP + (targetP - startP) * t
+            loadBarFill.Size = UDim2.new(currP, 0, 1, 0)
+            loadPercentLbl.Text = math.floor(currP * 100) .. "%"
+            task.wait(0.04)
+        end
+    end
+    
+    task.wait(0.3)
+    isFullyLoaded = true
+    TweenService:Create(loader, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Size = UDim2.fromOffset(0, 0) }):Play()
+    task.wait(0.3)
+    loader:Destroy()
+    setMenuVisible(true)
+end)
+
+-- Topbar & Header
+local topbar = create("Frame", {
+    Size = UDim2.new(1, 0, 0, 65),
+    BackgroundTransparency = 1,
+    ZIndex = 20
+}, main)
+
+local titleContainer = create("Frame", {
+    Position = UDim2.fromOffset(24, 12),
+    Size = UDim2.fromOffset(280, 45),
+    BackgroundTransparency = 1,
+    ZIndex = 21
+}, topbar)
+
+local titleLabel = create("TextLabel", {
+    Size = UDim2.new(1, 0, 0, 26),
+    BackgroundTransparency = 1,
+    Text = "EPRAS HUB",
+    TextColor3 = COLORS.Text,
+    TextSize = 22,
+    Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 22
+}, titleContainer)
+
+create("UIGradient", {
+    Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, COLORS.White),
+        ColorSequenceKeypoint.new(1, COLORS.Purple)
+    })
+}, titleLabel)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(0, 26),
+    Size = UDim2.new(1, 0, 0, 18),
+    BackgroundTransparency = 1,
+    Text = "universal script v2.0 • professional",
+    TextColor3 = COLORS.Muted,
+    TextSize = 12,
+    Font = Enum.Font.GothamMedium,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 22
+}, titleContainer)
+
+local status = create("Frame", {
+    Position = UDim2.new(1, -195, 0, 16),
+    Size = UDim2.fromOffset(105, 32),
+    BackgroundColor3 = Color3.fromRGB(30, 20, 50),
+    ZIndex = 21
+}, topbar)
+rounded(status, 16)
+
+local statusDot = create("Frame", {
+    Position = UDim2.fromOffset(12, 12),
+    Size = UDim2.fromOffset(8, 8),
+    BackgroundColor3 = COLORS.Green,
+    ZIndex = 22
+}, status)
+rounded(statusDot, 10)
+
+local statusLbl = create("TextLabel", {
+    Position = UDim2.fromOffset(26, 0),
+    Size = UDim2.fromOffset(75, 32),
+    BackgroundTransparency = 1,
+    Text = getTxt("running"),
+    TextColor3 = COLORS.Green,
+    TextSize = 10,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 22
+}, status)
+
+task.spawn(function()
+    while statusLbl and statusLbl.Parent do
+        statusLbl.Text = getTxt("running")
+        task.wait(0.5)
+    end
+end)
+
+local minimizeBtn = create("TextButton", {
+    Position = UDim2.new(1, -80, 0, 16),
+    Size = UDim2.fromOffset(32, 32),
+    BackgroundColor3 = COLORS.Card,
+    Text = "—",
+    TextColor3 = COLORS.Text,
+    TextSize = 14,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 22
+}, topbar)
+rounded(minimizeBtn, 8)
+
+local closeBtn = create("TextButton", {
+    Position = UDim2.new(1, -42, 0, 16),
+    Size = UDim2.fromOffset(32, 32),
+    BackgroundColor3 = Color3.fromRGB(60, 20, 40),
+    Text = "×",
+    TextColor3 = COLORS.Red,
+    TextSize = 18,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 22
+}, topbar)
+rounded(closeBtn, 8)
+
+-- CLOSE CONFIRM DIALOG
+local confirmFrame = create("Frame", {
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(380, 160),
+    BackgroundColor3 = COLORS.Panel,
+    Visible = false,
+    ZIndex = 50
+}, main)
+rounded(confirmFrame, 12)
+outline(confirmFrame, COLORS.Red, 1.5)
+
+local confirmText = create("TextLabel", {
+    Position = UDim2.fromOffset(20, 25),
+    Size = UDim2.new(1, -40, 0, 50),
+    BackgroundTransparency = 1,
+    Text = getTxt("closeConfirm"),
+    TextColor3 = COLORS.Text,
+    TextSize = 14,
+    Font = Enum.Font.GothamBold,
+    TextWrapped = true,
+    TextXAlignment = Enum.TextXAlignment.Center,
+    ZIndex = 51
+}, confirmFrame)
+
+local btnYes = create("TextButton", {
+    Position = UDim2.fromOffset(40, 95),
+    Size = UDim2.fromOffset(130, 36),
+    BackgroundColor3 = COLORS.Red,
+    Text = getTxt("yes"),
+    TextColor3 = COLORS.White,
+    TextSize = 13,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 51
+}, confirmFrame)
+rounded(btnYes, 8)
+
+local btnNo = create("TextButton", {
+    Position = UDim2.fromOffset(210, 95),
+    Size = UDim2.fromOffset(130, 36),
+    BackgroundColor3 = COLORS.Card,
+    Text = getTxt("no"),
+    TextColor3 = COLORS.Text,
+    TextSize = 13,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 51
+}, confirmFrame)
+rounded(btnNo, 8)
+
+task.spawn(function()
+    while confirmFrame and confirmFrame.Parent do
+        confirmText.Text = getTxt("closeConfirm")
+        btnYes.Text = getTxt("yes")
+        btnNo.Text = getTxt("no")
+        task.wait(0.5)
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function() confirmFrame.Visible = true end)
+btnNo.MouseButton1Click:Connect(function() confirmFrame.Visible = false end)
+btnYes.MouseButton1Click:Connect(function()
+    if bgSound then bgSound:Destroy() end
+    gui:Destroy()
+end)
+
+--==================================================
+-- HİLE MOTORU & BYPASS
+--==================================================
+
+local cheatFlags = {
+    MasterProtection = true,
+    BoxESP = false,
+    NameHealth = false,
+    Fullbright = false,
+    OriginalBrightness = Lighting.Brightness,
+    OriginalClockTime = Lighting.ClockTime,
+    OriginalShadows = Lighting.GlobalShadows,
+    OriginalAmbient = Lighting.OutdoorAmbient,
+    Aimbot = false,
+    DrawFOV = false,
+    FOVRadius = 120,
+    AimbotSmoothness = 3,
+    Crosshair = false,
+    CrosshairStyle = "Crosshair",
+    CrosshairColor = COLORS.Green,
+    Noclip = false,
+    FlyMode = false,
+    FlySpeed = 50,
+    WalkSpeed = 16,
+    SpeedFix = true,
+    JumpPower = 50,
+    SpinBot = false,
+    SpinSpeed = 50,
+    TeleportPanel = false
+}
+
+task.spawn(function()
+    pcall(function()
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        local oldNamecall = mt.__namecall
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if cheatFlags.MasterProtection and (method == "Kick" or method == "Ban" or method == "ReportViolation") then
+                return nil
+            end
+            return oldNamecall(self, ...)
+        end)
+    end)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if cheatFlags.Fullbright then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    end
+end)
+
+-- ESP & İsim + Sağlık
+local espObjects = {}
+local function clearEspForPlayer(p)
+    if espObjects[p] then
+        if espObjects[p].hl then espObjects[p].hl:Destroy() end
+        if espObjects[p].info then espObjects[p].info:Destroy() end
+        espObjects[p] = nil
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if not (cheatFlags.BoxESP or cheatFlags.NameHealth) then
+        for p, _ in pairs(espObjects) do clearEspForPlayer(p) end
+        return
+    end
+
+    local cam = workspace.CurrentCamera
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+            local char = p.Character
+            local hrp = char.HumanoidRootPart
+            local hum = char.Humanoid
+
+            if not espObjects[p] then espObjects[p] = {} end
+
+            if cheatFlags.BoxESP then
+                if not espObjects[p].hl then
+                    local hl = Instance.new("Highlight")
+                    hl.Adornee = char
+                    hl.FillColor = COLORS.Purple
+                    hl.OutlineColor = COLORS.White
+                    hl.FillTransparency = 0.6
+                    hl.Parent = char
+                    espObjects[p].hl = hl
+                end
+            else
+                if espObjects[p].hl then espObjects[p].hl:Destroy(); espObjects[p].hl = nil end
+            end
+
+            if cheatFlags.NameHealth then
+                if not espObjects[p].info then
+                    local bill = Instance.new("BillboardGui")
+                    bill.Size = UDim2.fromOffset(200, 50)
+                    bill.AlwaysOnTop = true
+                    bill.StudsOffset = Vector3.new(0, 3, 0)
+                    bill.Parent = hrp
+
+                    local lbl = Instance.new("TextLabel")
+                    lbl.Size = UDim2.fromScale(1, 1)
+                    lbl.BackgroundTransparency = 1
+                    lbl.TextColor3 = COLORS.White
+                    lbl.TextSize = 12
+                    lbl.Font = Enum.Font.GothamBold
+                    lbl.TextStrokeTransparency = 0.5
+                    lbl.Parent = bill
+                    espObjects[p].info = bill
+                end
+
+                local bill = espObjects[p].info
+                if bill and bill:FindFirstChildOfClass("TextLabel") then
+                    local dist = math.floor((hrp.Position - cam.CFrame.Position).Magnitude)
+                    local hp = math.floor(hum.Health)
+                    bill.TextLabel.Text = string.format("[%s] | HP: %d | %dm", p.Name, hp, dist)
+                end
+            else
+                if espObjects[p].info then espObjects[p].info:Destroy(); espObjects[p].info = nil end
+            end
+        else
+            clearEspForPlayer(p)
+        end
+    end
+end)
+
+-- Aimbot & FOV & Smooth Damping Mantığı
+local fovGui = create("Frame", {
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(240, 240),
+    BackgroundTransparency = 1,
+    Visible = false,
+    ZIndex = 998
+}, gui)
+rounded(fovGui, 120)
+local fovStroke = outline(fovGui, COLORS.Purple, 1.5)
+
+local crosshairGui = create("Frame", {
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(20, 20),
+    BackgroundTransparency = 1,
+    Visible = false,
+    ZIndex = 999
+}, gui)
+
+local function updateCrosshairStyle()
+    for _, c in ipairs(crosshairGui:GetChildren()) do c:Destroy() end
+    local col = COLORS.Green
+    create("Frame", { Position = UDim2.fromOffset(9, 0), Size = UDim2.fromOffset(2, 7), BackgroundColor3 = col }, crosshairGui)
+    create("Frame", { Position = UDim2.fromOffset(9, 13), Size = UDim2.fromOffset(2, 7), BackgroundColor3 = col }, crosshairGui)
+    create("Frame", { Position = UDim2.fromOffset(0, 9), Size = UDim2.fromOffset(7, 2), BackgroundColor3 = col }, crosshairGui)
+    create("Frame", { Position = UDim2.fromOffset(13, 9), Size = UDim2.fromOffset(7, 2), BackgroundColor3 = col }, crosshairGui)
+    create("Frame", { Position = UDim2.fromOffset(9, 9), Size = UDim2.fromOffset(2, 2), BackgroundColor3 = col }, crosshairGui)
+end
+updateCrosshairStyle()
+
+RunService.RenderStepped:Connect(function()
+    fovGui.Visible = cheatFlags.DrawFOV
+    crosshairGui.Visible = cheatFlags.Crosshair
+
+    if cheatFlags.DrawFOV then
+        fovGui.Size = UDim2.fromOffset(cheatFlags.FOVRadius * 2, cheatFlags.FOVRadius * 2)
+        rounded(fovGui, cheatFlags.FOVRadius)
+    end
+
+    local cam = workspace.CurrentCamera
+    local mousePos = UserInputService:GetMouseLocation()
+    local targetInFov = false
+    local closestTarget = nil
+    local shortestDist = cheatFlags.FOVRadius
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+            local head = p.Character.Head
+            local screenPoint, onScreen = cam:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local screenDist = (Vector2.new(screenPoint.X, screenPoint.Y) - mousePos).Magnitude
+                if screenDist <= cheatFlags.FOVRadius then
+                    targetInFov = true
+                    if screenDist < shortestDist then
+                        shortestDist = screenDist
+                        closestTarget = head
+                    end
+                end
+            end
+        end
+    end
+
+    if targetInFov then
+        fovStroke.Color = COLORS.Green
+    else
+        fovStroke.Color = COLORS.Purple
+    end
+
+    local isRightMouseDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+    if cheatFlags.Aimbot and isRightMouseDown and closestTarget then
+        local targetCFrame = CFrame.new(cam.CFrame.Position, closestTarget.Position)
+        local smoothFactor = math.clamp(cheatFlags.AimbotSmoothness / 10, 0.05, 1)
+        cam.CFrame = cam.CFrame:Lerp(targetCFrame, smoothFactor)
+    end
+end)
+
+-- Uçuş ve Hareket Mantığı
+local flyVelocity, flyGyro
+
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+        local humanoid = char.Humanoid
+        local rootPart = char.HumanoidRootPart
+
+        if cheatFlags.SpeedFix then
+            humanoid.WalkSpeed = cheatFlags.WalkSpeed
+        elseif cheatFlags.WalkSpeed > 16 then
+            humanoid.WalkSpeed = cheatFlags.WalkSpeed
+        end
+
+        pcall(function()
+            if humanoid.UseJumpPower then
+                humanoid.JumpPower = cheatFlags.JumpPower
+            else
+                humanoid.JumpHeight = cheatFlags.JumpPower * 0.4
+            end
+        end)
+
+        if cheatFlags.Noclip then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end
+
+        if cheatFlags.SpinBot then
+            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(cheatFlags.SpinSpeed), 0)
+        end
+
+        if cheatFlags.FlyMode then
+            if not flyVelocity then
+                flyVelocity = Instance.new("BodyVelocity")
+                flyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                flyVelocity.Velocity = Vector3.zero
+                flyVelocity.Parent = rootPart
+            end
+            if not flyGyro then
+                flyGyro = Instance.new("BodyGyro")
+                flyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                flyGyro.CFrame = rootPart.CFrame
+                flyGyro.Parent = rootPart
+            end
+
+            local cam = workspace.CurrentCamera
+            local moveDir = Vector3.zero
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+
+            flyVelocity.Velocity = moveDir * cheatFlags.FlySpeed
+            flyGyro.CFrame = cam.CFrame
+            humanoid.PlatformStand = true
+        else
+            if flyVelocity then flyVelocity:Destroy(); flyVelocity = nil end
+            if flyGyro then flyGyro:Destroy(); flyGyro = nil end
+            if humanoid.PlatformStand then humanoid.PlatformStand = false end
+        end
+    end
+end)
+
+--==================================================
+-- NAVIGATION & PAGES
+--==================================================
+
+local sidebar = create("Frame", {
+    Position = UDim2.fromOffset(16, 75),
+    Size = UDim2.fromOffset(210, 440),
+    BackgroundTransparency = 1,
+    ZIndex = 20
+}, main)
+
+local pageContainer = create("Frame", {
+    Position = UDim2.fromOffset(240, 75),
+    Size = UDim2.new(1, -256, 1, -90),
+    BackgroundTransparency = 1,
+    ZIndex = 20
+}, main)
+
+local tabs = {
+    {"🏠", "dashboard", "subMain"},
+    {"👁", "visuals", "subVisuals"},
+    {"🎯", "targeting", "subTargeting"},
+    {"⚡", "movement", "subMovement"},
+    {"🌀", "teleportPanel", "teleportPanelDesc"},
+    {"⚙", "settings", "subSettings"}
+}
+
+local pageFrames = {}
+local tabButtons = {}
+
+local function createPage(index, titleKey, subKey)
+    local page = create("ScrollingFrame", {
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        Visible = (index == 1),
+        CanvasSize = UDim2.new(0, 0, 0, 620),
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = COLORS.Purple,
+        ZIndex = 21
+    }, pageContainer)
+
+    local tLbl = create("TextLabel", {
+        Position = UDim2.fromOffset(0, 0),
+        Size = UDim2.new(1, 0, 0, 28),
+        BackgroundTransparency = 1,
+        Text = getTxt(titleKey),
+        TextColor3 = COLORS.Text,
+        TextSize = 22,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 22
+    }, page)
+
+    local sLbl = create("TextLabel", {
+        Position = UDim2.fromOffset(0, 28),
+        Size = UDim2.new(1, 0, 0, 20),
+        BackgroundTransparency = 1,
+        Text = getTxt(subKey),
+        TextColor3 = COLORS.Muted,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 22
+    }, page)
+
+    task.spawn(function()
+        while page and page.Parent do
+            tLbl.Text = getTxt(titleKey)
+            sLbl.Text = getTxt(subKey)
+            task.wait(0.5)
+        end
+    end)
+
+    pageFrames[index] = page
+    return page
+end
+
+local function createToggle(parent, y, titleKey, descKey, emoji, initialVal, callback)
+    local state = initialVal
+    local card = create("Frame", {
+        Position = UDim2.fromOffset(0, y),
+        Size = UDim2.new(1, -10, 0, 68),
+        BackgroundColor3 = COLORS.Card,
+        ZIndex = 22
+    }, parent)
+    rounded(card, 10)
+
+    create("TextLabel", {
+        Position = UDim2.fromOffset(14, 14),
+        Size = UDim2.fromOffset(40, 40),
+        BackgroundColor3 = COLORS.PurpleDark,
+        Text = emoji,
+        TextSize = 18,
+        ZIndex = 23
+    }, card)
+    rounded(card:FindFirstChildOfClass("TextLabel"), 8)
+
+    local tLbl = create("TextLabel", {
+        Position = UDim2.fromOffset(64, 12),
+        Size = UDim2.new(1, -140, 0, 20),
+        BackgroundTransparency = 1,
+        Text = getTxt(titleKey),
+        TextColor3 = COLORS.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 23
+    }, card)
+
+    local dLbl = create("TextLabel", {
+        Position = UDim2.fromOffset(64, 34),
+        Size = UDim2.new(1, -140, 0, 18),
+        BackgroundTransparency = 1,
+        Text = getTxt(descKey),
+        TextColor3 = COLORS.Muted,
+        TextSize = 11,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 23
+    }, card)
+
+    task.spawn(function()
+        while card and card.Parent do
+            tLbl.Text = getTxt(titleKey)
+            dLbl.Text = getTxt(descKey)
+            task.wait(0.5)
+        end
+    end)
+
+    local btn = create("TextButton", {
+        Position = UDim2.new(1, -60, 0.5, -12),
+        Size = UDim2.fromOffset(46, 24),
+        BackgroundColor3 = state and COLORS.Purple or Color3.fromRGB(45, 33, 68),
+        Text = "",
+        ZIndex = 23
+    }, card)
+    rounded(btn, 12)
+
+    local dot = create("Frame", {
+        Position = state and UDim2.fromOffset(25, 3) or UDim2.fromOffset(3, 3),
+        Size = UDim2.fromOffset(18, 18),
+        BackgroundColor3 = COLORS.White,
+        ZIndex = 24
+    }, btn)
+    rounded(dot, 10)
+
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        TweenService:Create(btn, TweenInfo.new(0.2), { BackgroundColor3 = state and COLORS.Purple or Color3.fromRGB(45, 33, 68) }):Play()
+        TweenService:Create(dot, TweenInfo.new(0.2), { Position = state and UDim2.fromOffset(25, 3) or UDim2.fromOffset(3, 3) }):Play()
+        if callback then callback(state) end
+    end)
+end
+
+local function createSlider(parent, y, titleKey, descKey, emoji, min, max, default, isSmoothBar, callback)
+    local val = default
+    local card = create("Frame", {
+        Position = UDim2.fromOffset(0, y),
+        Size = UDim2.new(1, -10, 0, 68),
+        BackgroundColor3 = COLORS.Card,
+        ZIndex = 22
+    }, parent)
+    rounded(card, 10)
+
+    create("TextLabel", {
+        Position = UDim2.fromOffset(14, 14),
+        Size = UDim2.fromOffset(40, 40),
+        BackgroundColor3 = COLORS.PurpleDark,
+        Text = emoji,
+        TextSize = 18,
+        ZIndex = 23
+    }, card)
+    rounded(card:FindFirstChildOfClass("TextLabel"), 8)
+
+    local tLbl = create("TextLabel", {
+        Position = UDim2.fromOffset(64, 10),
+        Size = UDim2.new(1, -150, 0, 20),
+        BackgroundTransparency = 1,
+        Text = getTxt(titleKey),
+        TextColor3 = COLORS.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 23
+    }, card)
+
+    local valLbl = create("TextLabel", {
+        Position = UDim2.new(1, -70, 0, 10),
+        Size = UDim2.fromOffset(55, 20),
+        BackgroundTransparency = 1,
+        Text = tostring(default),
+        TextColor3 = isSmoothBar and (default <= 3 and COLORS.Green or (default <= 7 and COLORS.Yellow or COLORS.Red)) or COLORS.Purple,
+        TextSize = 13,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        ZIndex = 23
+    }, card)
+
+    task.spawn(function()
+        while card and card.Parent do
+            tLbl.Text = getTxt(titleKey)
+            task.wait(0.5)
+        end
+    end)
+
+    local sliderBg = create("Frame", {
+        Position = UDim2.fromOffset(64, 40),
+        Size = UDim2.new(1, -80, 0, 6),
+        BackgroundColor3 = Color3.fromRGB(45, 33, 68),
+        ZIndex = 23
+    }, card)
+    rounded(sliderBg, 3)
+
+    local pct = (default - min) / (max - min)
+    local fill = create("Frame", {
+        Size = UDim2.new(pct, 0, 1, 0),
+        BackgroundColor3 = isSmoothBar and (default <= 3 and COLORS.Green or (default <= 7 and COLORS.Yellow or COLORS.Red)) or COLORS.Purple,
+        ZIndex = 24
+    }, sliderBg)
+    rounded(fill, 3)
+
+    local handle = create("TextButton", {
+        Position = UDim2.new(pct, -6, 0.5, -6),
+        Size = UDim2.fromOffset(12, 12),
+        BackgroundColor3 = COLORS.White,
+        Text = "",
+        ZIndex = 25
+    }, sliderBg)
+    rounded(handle, 6)
+
+    local dragging = false
+    handle.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+    end)
+    UserInputService.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(inp)
+        if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
+            local p = math.clamp((inp.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+            val = math.floor(min + (max - min) * p + 0.5)
+            local currentPct = (val - min) / (max - min)
+            fill.Size = UDim2.new(currentPct, 0, 1, 0)
+            handle.Position = UDim2.new(currentPct, -6, 0.5, -6)
+            valLbl.Text = tostring(val)
+            
+            if isSmoothBar then
+                local col = (val <= 3 and COLORS.Green or (val <= 7 and COLORS.Yellow or COLORS.Red))
+                fill.BackgroundColor3 = col
+                valLbl.TextColor3 = col
+            end
+
+            if callback then callback(val) end
+        end
+    end)
+end
+
+-- SAYFALAR
+local p1 = createPage(1, "dashboard", "subMain")
+createToggle(p1, 60, "masterProt", "masterProtDesc", "✨", cheatFlags.MasterProtection, function(v) cheatFlags.MasterProtection = v end)
+createToggle(p1, 138, "streamProof", "streamProofDesc", "👁", false, function(v)
+    isStreamProofActive = v
+    updateStreamProof()
+end)
+
+local p2 = createPage(2, "visuals", "subVisuals")
+createToggle(p2, 60, "boxEsp", "boxEspDesc", "📦", cheatFlags.BoxESP, function(v) cheatFlags.BoxESP = v end)
+createToggle(p2, 138, "nameTags", "nameTagsDesc", "🏷", cheatFlags.NameHealth, function(v) cheatFlags.NameHealth = v end)
+createToggle(p2, 216, "fullbright", "fullbrightDesc", "💡", cheatFlags.Fullbright, function(v)
+    cheatFlags.Fullbright = v
+    if not v then
+        Lighting.Brightness = cheatFlags.OriginalBrightness
+        Lighting.ClockTime = cheatFlags.OriginalClockTime
+        Lighting.GlobalShadows = cheatFlags.OriginalShadows
+        Lighting.OutdoorAmbient = cheatFlags.OriginalAmbient
+    end
+end)
+createToggle(p2, 294, "crosshair", "crosshairDesc", "✚", cheatFlags.Crosshair, function(v) cheatFlags.Crosshair = v end)
+
+local p3 = createPage(3, "targeting", "subTargeting")
+createToggle(p3, 60, "aimbot", "aimbotDesc", "🎯", cheatFlags.Aimbot, function(v) cheatFlags.Aimbot = v end)
+createToggle(p3, 138, "fovToggle", "aimbotDesc2", "⭕", cheatFlags.DrawFOV, function(v) cheatFlags.DrawFOV = v end)
+createSlider(p3, 216, "fovRing", "fovRingDesc", "📏", 30, 400, cheatFlags.FOVRadius, false, function(v) cheatFlags.FOVRadius = v end)
+createSlider(p3, 294, "smoothTitle", "smoothDesc", "⚡", 1, 10, cheatFlags.AimbotSmoothness, true, function(v) cheatFlags.AimbotSmoothness = v end)
+
+local p4 = createPage(4, "movement", "subMovement")
+createToggle(p4, 60, "noclip", "noclipDesc", "👻", cheatFlags.Noclip, function(v) cheatFlags.Noclip = v end)
+createToggle(p4, 138, "speedFix", "speedFixDesc", "🏃", cheatFlags.SpeedFix, function(v) cheatFlags.SpeedFix = v end)
+createToggle(p4, 216, "flyMode", "flyModeDesc", "🕊", cheatFlags.FlyMode, function(v) cheatFlags.FlyMode = v end)
+createSlider(p4, 294, "speedMult", "speedMultDesc", "⚡", 16, 150, cheatFlags.WalkSpeed, false, function(v) cheatFlags.WalkSpeed = v end)
+createSlider(p4, 372, "jumpPower", "jumpPowerDesc", "🦘", 50, 300, cheatFlags.JumpPower, false, function(v) cheatFlags.JumpPower = v end)
+createToggle(p4, 450, "spinBot", "spinBotDesc", "🌪", cheatFlags.SpinBot, function(v) cheatFlags.SpinBot = v end)
+createSlider(p4, 528, "spinBot", "spinBotDesc", "🌀", 10, 200, cheatFlags.SpinSpeed, false, function(v) cheatFlags.SpinSpeed = v end)
+
+local p5 = createPage(5, "teleportPanel", "teleportPanelDesc")
+
+local tpSearchBox = create("TextBox", {
+    Position = UDim2.fromOffset(0, 60),
+    Size = UDim2.new(1, -12, 0, 36),
+    BackgroundColor3 = COLORS.Card,
+    PlaceholderText = getTxt("searchPlayer"),
+    Text = "",
+    TextColor3 = COLORS.Text,
+    PlaceholderColor3 = COLORS.Muted,
+    TextSize = 13,
+    Font = Enum.Font.Gotham,
+    ZIndex = 22
+}, p5)
+rounded(tpSearchBox, 8)
+create("UIPadding", { PaddingLeft = UDim.new(0, 12) }, tpSearchBox)
+
+local tpListScrolling = create("ScrollingFrame", {
+    Position = UDim2.fromOffset(0, 105),
+    Size = UDim2.new(1, -12, 0, 395),
+    BackgroundTransparency = 1,
+    CanvasSize = UDim2.new(0, 0, 0, 0),
+    ScrollBarThickness = 3,
+    ZIndex = 22
+}, p5)
+
+local spectatingTarget = nil
+RunService.RenderStepped:Connect(function()
+    if spectatingTarget and spectatingTarget.Character and spectatingTarget.Character:FindFirstChild("HumanoidRootPart") then
+        workspace.CurrentCamera.CameraSubject = spectatingTarget.Character.Humanoid
+    end
+end)
+
+local function refreshDedicatedPlayerList(filterText)
+    for _, child in ipairs(tpListScrolling:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+
+    local yPos = 0
+    filterText = string.lower(filterText or "")
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and (filterText == "" or string.find(string.lower(p.Name), filterText)) then
+            local pRow = create("Frame", {
+                Position = UDim2.fromOffset(0, yPos),
+                Size = UDim2.new(1, -6, 0, 42),
+                BackgroundColor3 = COLORS.Card,
+                ZIndex = 23
+            }, tpListScrolling)
+            rounded(pRow, 8)
+            local rowStroke = outline(pRow, COLORS.PurpleDark, 1)
+
+            local nameLbl = create("TextLabel", {
+                Position = UDim2.fromOffset(12, 0),
+                Size = UDim2.new(1, -210, 1, 0),
+                BackgroundTransparency = 1,
+                Text = p.Name,
+                TextColor3 = COLORS.Text,
+                TextSize = 13,
+                Font = Enum.Font.GothamBold,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 24
+            }, pRow)
+
+            local tpBtn = create("TextButton", {
+                Position = UDim2.new(1, -200, 0.5, -14),
+                Size = UDim2.new(0, 55, 0, 28),
+                BackgroundColor3 = COLORS.PurpleDark,
+                Text = getTxt("tp"),
+                TextColor3 = COLORS.Text,
+                TextSize = 11,
+                Font = Enum.Font.GothamBold,
+                ZIndex = 24
+            }, pRow)
+            rounded(tpBtn, 6)
+            tpBtn.MouseButton1Click:Connect(function()
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+                end
+            end)
+
+            local isFollowing = false
+            local followBtn = create("TextButton", {
+                Position = UDim2.new(1, -140, 0.5, -14),
+                Size = UDim2.new(0, 65, 0, 28),
+                BackgroundColor3 = COLORS.PurpleDark,
+                Text = getTxt("follow"),
+                TextColor3 = COLORS.Text,
+                TextSize = 10,
+                Font = Enum.Font.GothamBold,
+                ZIndex = 24
+            }, pRow)
+            rounded(followBtn, 6)
+
+            followBtn.MouseButton1Click:Connect(function()
+                isFollowing = not isFollowing
+                if isFollowing then
+                    followBtn.Text = getTxt("stopFollow")
+                    followBtn.BackgroundColor3 = COLORS.Red
+                    rowStroke.Color = COLORS.Green
+                    pRow.BackgroundColor3 = Color3.fromRGB(20, 40, 30)
+                    task.spawn(function()
+                        while isFollowing do
+                            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                                player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                            end
+                            task.wait(0.1)
+                        end
+                    end)
+                else
+                    followBtn.Text = getTxt("follow")
+                    followBtn.BackgroundColor3 = COLORS.PurpleDark
+                    rowStroke.Color = COLORS.PurpleDark
+                    pRow.BackgroundColor3 = COLORS.Card
+                end
+            end)
+
+            local specBtn = create("TextButton", {
+                Position = UDim2.new(1, -70, 0.5, -14),
+                Size = UDim2.new(0, 58, 0, 28),
+                BackgroundColor3 = COLORS.PurpleDark,
+                Text = getTxt("spectate"),
+                TextColor3 = COLORS.Text,
+                TextSize = 10,
+                Font = Enum.Font.GothamBold,
+                ZIndex = 24
+            }, pRow)
+            rounded(specBtn, 6)
+
+            specBtn.MouseButton1Click:Connect(function()
+                if spectatingTarget == p then
+                    spectatingTarget = nil
+                    specBtn.Text = getTxt("spectate")
+                    specBtn.BackgroundColor3 = COLORS.PurpleDark
+                    workspace.CurrentCamera.CameraSubject = player.Character and player.Character.Humanoid
+                else
+                    spectatingTarget = p
+                    specBtn.Text = getTxt("stopSpectate")
+                    specBtn.BackgroundColor3 = COLORS.Red
+                end
+            end)
+
+            yPos = yPos + 48
+        end
+    end
+    tpListScrolling.CanvasSize = UDim2.new(0, 0, 0, yPos)
+end
+
+tpSearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    refreshDedicatedPlayerList(tpSearchBox.Text)
+end)
+
+local p6 = createPage(6, "settings", "subSettings")
+createSlider(p6, 60, "bgMusic", "bgMusicDesc", "🔊", 0, 100, 8, false, function(v)
+    if bgSound then bgSound.Volume = v / 100 end
+end)
+
+local langCard = create("Frame", {
+    Position = UDim2.fromOffset(0, 138),
+    Size = UDim2.new(1, -10, 0, 68),
+    BackgroundColor3 = COLORS.Card,
+    ZIndex = 22
+}, p6)
+rounded(langCard, 10)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(14, 14),
+    Size = UDim2.fromOffset(40, 40),
+    BackgroundColor3 = COLORS.PurpleDark,
+    Text = "🌐",
+    TextSize = 18,
+    ZIndex = 23
+}, langCard)
+rounded(langCard:FindFirstChildOfClass("TextLabel"), 8)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(64, 12),
+    Size = UDim2.fromOffset(200, 20),
+    BackgroundTransparency = 1,
+    Text = getTxt("langSelect"),
+    TextColor3 = COLORS.Text,
+    TextSize = 14,
+    Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 23
+}, langCard)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(64, 34),
+    Size = UDim2.new(1, -230, 0, 18),
+    BackgroundTransparency = 1,
+    Text = getTxt("langSelectDesc"),
+    TextColor3 = COLORS.Muted,
+    TextSize = 11,
+    Font = Enum.Font.Gotham,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 23
+}, langCard)
+
+local flagContainer = create("Frame", {
+    Position = UDim2.new(1, -170, 0.5, -16),
+    Size = UDim2.fromOffset(160, 32),
+    BackgroundTransparency = 1,
+    ZIndex = 23
+}, langCard)
+
+local flags = { {c="EN", t="🇺🇸"}, {c="TR", t="🇹🇷"}, {c="ZH", t="🇨🇳"}, {c="AR", t="🇸🇦"} }
+local flagBtns = {}
+for i, f in ipairs(flags) do
+    local fBtn = create("TextButton", {
+        Position = UDim2.fromOffset((i-1)*38, 0),
+        Size = UDim2.fromOffset(32, 32),
+        BackgroundColor3 = f.c == currentLang and COLORS.Purple or Color3.fromRGB(45, 33, 68),
+        Text = f.t,
+        TextSize = 16,
+        ZIndex = 24
+    }, flagContainer)
+    rounded(fBtn, 6)
+    flagBtns[f.c] = fBtn
+    fBtn.MouseButton1Click:Connect(function()
+        currentLang = f.c
+        for code, btn in pairs(flagBtns) do
+            btn.BackgroundColor3 = (code == currentLang) and COLORS.Purple or Color3.fromRGB(45, 33, 68)
+        end
+    end)
+end
+
+local bindCard = create("Frame", {
+    Position = UDim2.fromOffset(0, 216),
+    Size = UDim2.new(1, -10, 0, 68),
+    BackgroundColor3 = COLORS.Card,
+    ZIndex = 22
+}, p6)
+rounded(bindCard, 10)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(14, 14),
+    Size = UDim2.fromOffset(40, 40),
+    BackgroundColor3 = COLORS.PurpleDark,
+    Text = "⌨",
+    TextSize = 18,
+    ZIndex = 23
+}, bindCard)
+rounded(bindCard:FindFirstChildOfClass("TextLabel"), 8)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(64, 12),
+    Size = UDim2.new(1, -200, 0, 20),
+    BackgroundTransparency = 1,
+    Text = getTxt("toggleKey"),
+    TextColor3 = COLORS.Text,
+    TextSize = 14,
+    Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 23
+}, bindCard)
+
+create("TextLabel", {
+    Position = UDim2.fromOffset(64, 34),
+    Size = UDim2.new(1, -230, 0, 18),
+    BackgroundTransparency = 1,
+    Text = getTxt("toggleKeyDesc"),
+    TextColor3 = COLORS.Muted,
+    TextSize = 11,
+    Font = Enum.Font.Gotham,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 23
+}, bindCard)
+
+local bindBtn = create("TextButton", {
+    Position = UDim2.new(1, -110, 0.5, -15),
+    Size = UDim2.fromOffset(95, 30),
+    BackgroundColor3 = Color3.fromRGB(45, 33, 68),
+    Text = toggleKey.Name,
+    TextColor3 = COLORS.Purple,
+    TextSize = 12,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 23
+}, bindCard)
+rounded(bindBtn, 8)
+
+local listeningBind = false
+bindBtn.MouseButton1Click:Connect(function()
+    listeningBind = true
+    bindBtn.Text = "..."
+end)
+
+UserInputService.InputBegan:Connect(function(inp, gpe)
+    if listeningBind and inp.UserInputType == Enum.UserInputType.Keyboard then
+        toggleKey = inp.KeyCode
+        bindBtn.Name = toggleKey.Name
+        bindBtn.Text = toggleKey.Name
+        listeningBind = false
+    elseif not gpe and isFullyLoaded and inp.KeyCode == toggleKey then
+        setMenuVisible(not isMenuOpen)
+    end
+end)
+
+for idx, tabData in ipairs(tabs) do
+    local btn = create("TextButton", {
+        Position = UDim2.fromOffset(0, (idx - 1) * 58),
+        Size = UDim2.new(1, 0, 0, 50),
+        BackgroundColor3 = idx == 1 and COLORS.Card or COLORS.Panel,
+        Text = "",
+        ZIndex = 22
+    }, sidebar)
+    rounded(btn, 10)
+    local stroke = outline(btn, COLORS.Purple, 0)
+
+    create("TextLabel", {
+        Position = UDim2.fromOffset(14, 0),
+        Size = UDim2.fromOffset(24, 50),
+        BackgroundTransparency = 1,
+        Text = tabData[1],
+        TextSize = 18,
+        ZIndex = 23
+    }, btn)
+
+    local lbl = create("TextLabel", {
+        Position = UDim2.fromOffset(48, 0),
+        Size = UDim2.new(1, -52, 1, 0),
+        BackgroundTransparency = 1,
+        Text = getTxt(tabData[2]),
+        TextColor3 = COLORS.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 23
+    }, btn)
+
+    btn.MouseEnter:Connect(function()
+        if pageFrames[idx].Visible == false then
+            TweenService:Create(btn, TweenInfo.new(0.2), { Position = UDim2.fromOffset(6, (idx - 1) * 58) }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.2), { Thickness = 1 }):Play()
+        end
+    end)
+
+    btn.MouseLeave:Connect(function()
+        if pageFrames[idx].Visible == false then
+            TweenService:Create(btn, TweenInfo.new(0.2), { Position = UDim2.fromOffset(0, (idx - 1) * 58) }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.2), { Thickness = 0 }):Play()
+        end
+    end)
+
+    task.spawn(function()
+        while btn and btn.Parent do
+            lbl.Text = getTxt(tabData.id or tabData[2])
+            task.wait(0.5)
+        end
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        for i, p in ipairs(pageFrames) do p.Visible = (i == idx) end
+        for i, b in ipairs(tabButtons) do
+            local isSelected = (i == idx)
+            TweenService:Create(b, TweenInfo.new(0.25), {
+                BackgroundColor3 = isSelected and COLORS.Card or COLORS.Panel,
+                Position = isSelected and UDim2.fromOffset(8, (i - 1) * 58) or UDim2.fromOffset(0, (i - 1) * 58)
+            }):Play()
+            local bStroke = b:FindFirstChildOfClass("UIStroke")
+            if bStroke then
+                TweenService:Create(bStroke, TweenInfo.new(0.25), { Thickness = isSelected and 1.5 or 0 }):Play()
+            end
+        end
+        if idx == 5 then refreshDedicatedPlayerList("") end
+    end)
+    tabButtons[idx] = btn
+end
+
+minimizeBtn.MouseButton1Click:Connect(function() setMenuVisible(false) end)
+
+local draggingMain, dragStart, startPos
+topbar.InputBegan:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingMain = true
+        dragStart = inp.Position
+        startPos = main.Position
+    end
+end)
+
+topbar.InputEnded:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1 then draggingMain = false end
+end)
+
+UserInputService.InputChanged:Connect(function(inp)
+    if draggingMain and inp.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = inp.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
